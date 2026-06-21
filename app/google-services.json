@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "771570130959",
+    "project_id": "club-performance-tracker",
+    "storage_bucket": "club-performance-tracker.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:771570130959:android:05241fa866cdb20a9bc37a",
+        "android_client_info": {
+          "package_name": "com.example.clubperfomencetracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAajIwzeI-J7-fqJkSXr4uNFOlp88YAvWs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
