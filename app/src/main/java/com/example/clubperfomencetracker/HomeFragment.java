@@ -134,14 +134,17 @@ public class HomeFragment extends Fragment {
 
     private void fetchCodeforcesRating(String handle) {
         String url = "https://codeforces.com/api/user.info?handles=" + handle;
-        Request request = new Request.Builder().url(url).build();
+        Request request = new Request.Builder()
+                .url(url)
+                .header("Accept", "application/json")
+                .build();
 
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
-                        tvCfRating.setText("Error");
+                        tvCfRating.setText("--");
                         if (tvCfRank != null) tvCfRank.setText("Offline");
                     });
                 }
@@ -149,24 +152,53 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.isSuccessful() && response.body() != null) {
-                    try {
-                        String jsonData = response.body().string();
-                        JSONObject jsonObject = new JSONObject(jsonData);
-                        if ("OK".equals(jsonObject.getString("status"))) {
-                            JSONArray result = jsonObject.getJSONArray("result");
-                            if (result.length() > 0) {
-                                JSONObject userInfo = result.getJSONObject(0);
-                                int rating = userInfo.has("rating") ? userInfo.getInt("rating") : 0;
-                                String rank = userInfo.has("rank") ? userInfo.getString("rank") : "Unrated";
-                                
-                                if (getActivity() != null) {
-                                    getActivity().runOnUiThread(() -> updateRatingUI(rating, rank));
-                                }
-                            }
+                if (!response.isSuccessful() || response.body() == null) {
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> {
+                            tvCfRating.setText("--");
+                            if (tvCfRank != null) tvCfRank.setText("Error");
+                        });
+                    }
+                    return;
+                }
+                
+                try {
+                    String jsonData = response.body().string();
+                    JSONObject jsonObject = new JSONObject(jsonData);
+                    
+                    if (!"OK".equals(jsonObject.getString("status"))) {
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(() -> {
+                                tvCfRating.setText("--");
+                                if (tvCfRank != null) tvCfRank.setText("N/A");
+                            });
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                        return;
+                    }
+                    
+                    JSONArray result = jsonObject.getJSONArray("result");
+                    if (result.length() > 0) {
+                        JSONObject userInfo = result.getJSONObject(0);
+                        int rating = userInfo.optInt("rating", 0);
+                        String rank = userInfo.optString("rank", "Unrated");
+                        
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(() -> updateRatingUI(rating, rank));
+                        }
+                    } else {
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(() -> {
+                                tvCfRating.setText("--");
+                                if (tvCfRank != null) tvCfRank.setText("Not Found");
+                            });
+                        }
+                    }
+                } catch (Exception e) {
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> {
+                            tvCfRating.setText("--");
+                            if (tvCfRank != null) tvCfRank.setText("Error");
+                        });
                     }
                 }
             }
@@ -174,8 +206,13 @@ public class HomeFragment extends Fragment {
     }
 
     private void updateRatingUI(int rating, String rank) {
-        tvCfRating.setText(String.valueOf(rating));
-        if (tvCfRank != null && !rank.isEmpty()) {
+        if (rating == 0) {
+            tvCfRating.setText("Unrated");
+        } else {
+            tvCfRating.setText(String.valueOf(rating));
+        }
+        
+        if (tvCfRank != null && rank != null && !rank.isEmpty()) {
             tvCfRank.setText(rank.substring(0, 1).toUpperCase() + rank.substring(1));
         }
         

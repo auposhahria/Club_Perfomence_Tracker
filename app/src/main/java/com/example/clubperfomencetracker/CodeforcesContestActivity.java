@@ -122,8 +122,9 @@ public class CodeforcesContestActivity extends AppCompatActivity {
         }
 
         Request request = new Request.Builder()
-                .url("https://codeforces.com/api/user.ratedList?activeOnly=true")
+                .url("https://codeforces.com/api/user.ratedList?activeOnly=false")
                 .header("User-Agent", "ClubPerformanceTracker/1.0")
+                .header("Accept", "application/json")
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
@@ -217,7 +218,7 @@ public class CodeforcesContestActivity extends AppCompatActivity {
     private Ranking readUserFromStream(JsonReader reader) throws IOException {
         String handle = "";
         int rating = 0;
-        boolean belongsToOrg = false;
+        String organization = "";
 
         reader.beginObject();
         while (reader.hasNext()) {
@@ -227,17 +228,36 @@ public class CodeforcesContestActivity extends AppCompatActivity {
                 continue;
             }
             switch (name) {
-                case "handle": handle = reader.nextString(); break;
-                case "rating": rating = reader.nextInt(); break;
-                case "organization":
-                    String org = reader.nextString();
-                    if (org.toLowerCase().contains("kiu") || org.contains("47972")) belongsToOrg = true;
+                case "handle": 
+                    handle = reader.nextString(); 
                     break;
-                default: reader.skipValue(); break;
+                case "rating": 
+                    rating = reader.nextInt(); 
+                    break;
+                case "organization":
+                    organization = reader.nextString();
+                    break;
+                default: 
+                    reader.skipValue(); 
+                    break;
             }
         }
         reader.endObject();
-        return belongsToOrg ? new Ranking(0, handle, rating, "", 0) : null;
+        
+        // Check if user belongs to organization (KIU)
+        boolean belongsToOrg = false;
+        if (organization != null && !organization.isEmpty()) {
+            String orgLower = organization.toLowerCase();
+            if (orgLower.contains("kiu") || orgLower.contains("khulna") || organization.contains("47972")) {
+                belongsToOrg = true;
+            }
+        }
+        
+        // Only return users with valid handle and rating
+        if (!handle.isEmpty() && rating > 0 && belongsToOrg) {
+            return new Ranking(0, handle, rating, "", 0);
+        }
+        return null;
     }
 
     private void scrollToMe() {

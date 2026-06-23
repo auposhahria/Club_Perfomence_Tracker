@@ -59,33 +59,59 @@ public class ProgrammerDetailActivity extends AppCompatActivity {
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 runOnUiThread(() -> {
                     progressDialog.dismiss();
-                    Toast.makeText(ProgrammerDetailActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ProgrammerDetailActivity.this, "Network Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.isSuccessful() && response.body() != null) {
-                    try {
-                        String jsonData = response.body().string();
-                        JSONObject jsonObject = new JSONObject(jsonData);
-                        if ("OK".equals(jsonObject.getString("status"))) {
-                            JSONArray result = jsonObject.getJSONArray("result");
-                            if (result.length() > 0) {
-                                JSONObject user = result.getJSONObject(0);
-                                String name = user.has("firstName") ? user.getString("firstName") + " " + (user.has("lastName") ? user.getString("lastName") : "") : handle;
-                                int maxRating = user.has("maxRating") ? user.getInt("maxRating") : 0;
-                                
-                                runOnUiThread(() -> {
-                                    progressDialog.dismiss();
-                                    tvName.setText(name);
-                                    tvMaxRating.setText("Max Rating: " + maxRating);
-                                });
-                            }
-                        }
-                    } catch (Exception e) {
-                        runOnUiThread(() -> progressDialog.dismiss());
+                if (!response.isSuccessful() || response.body() == null) {
+                    runOnUiThread(() -> {
+                        progressDialog.dismiss();
+                        Toast.makeText(ProgrammerDetailActivity.this, "Invalid Response", Toast.LENGTH_SHORT).show();
+                    });
+                    return;
+                }
+                
+                try {
+                    String jsonData = response.body().string();
+                    JSONObject jsonObject = new JSONObject(jsonData);
+                    
+                    if (!"OK".equals(jsonObject.getString("status"))) {
+                        runOnUiThread(() -> {
+                            progressDialog.dismiss();
+                            Toast.makeText(ProgrammerDetailActivity.this, "User not found", Toast.LENGTH_SHORT).show();
+                        });
+                        return;
                     }
+                    
+                    JSONArray result = jsonObject.getJSONArray("result");
+                    if (result.length() > 0) {
+                        JSONObject user = result.getJSONObject(0);
+                        String firstName = user.optString("firstName", "");
+                        String lastName = user.optString("lastName", "");
+                        String name = (firstName + " " + lastName).trim();
+                        if (name.isEmpty()) name = handle;
+                        
+                        int maxRating = user.optInt("maxRating", 0);
+                        int currentRating = user.optInt("rating", 0);
+                        
+                        runOnUiThread(() -> {
+                            progressDialog.dismiss();
+                            tvName.setText(name);
+                            tvMaxRating.setText("Max Rating: " + maxRating + " | Current: " + currentRating);
+                        });
+                    } else {
+                        runOnUiThread(() -> {
+                            progressDialog.dismiss();
+                            Toast.makeText(ProgrammerDetailActivity.this, "No user data found", Toast.LENGTH_SHORT).show();
+                        });
+                    }
+                } catch (Exception e) {
+                    runOnUiThread(() -> {
+                        progressDialog.dismiss();
+                        Toast.makeText(ProgrammerDetailActivity.this, "Parse Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
                 }
             }
         });
