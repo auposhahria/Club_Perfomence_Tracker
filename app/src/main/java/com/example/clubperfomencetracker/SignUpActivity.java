@@ -1,6 +1,5 @@
 package com.example.clubperfomencetracker;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
@@ -16,7 +15,7 @@ import com.google.firebase.database.FirebaseDatabase;
 public class SignUpActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private DatabaseReference mDatabase;
-    private ProgressDialog loadingBar;
+    private LoadingDialog loadingBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,10 +25,9 @@ public class SignUpActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference();
         
-        loadingBar = new ProgressDialog(this);
+        loadingBar = new LoadingDialog(this);
         loadingBar.setTitle("Creating Account");
         loadingBar.setMessage("Please wait, we are registering your data...");
-        loadingBar.setCanceledOnTouchOutside(false);
 
         TextInputEditText etName = findViewById(R.id.etName);
         TextInputEditText etEmail = findViewById(R.id.etEmail);

@@ -1,81 +1,172 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/swipeRefresh"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#F4FAFA">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tvContestName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="KIU Leaderboard"
-            android:textAppearance="?attr/textAppearanceHeadlineSmall" />
-
-        <TextView
-            android:id="@+id/tvStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Scanning Codeforces..."
-            android:textAppearance="?attr/textAppearanceLabelSmall"
-            android:textColor="?attr/colorPrimary"
-            android:visibility="gone" />
-
-        <TextView
-            android:id="@+id/tvLastUpdated"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Last updated: Never"
-            android:textAppearance="?attr/textAppearanceLabelSmall"
-            android:layout_marginBottom="8dp" />
-
-        <ProgressBar
-            android:id="@+id/rankingProgressBar"
-            style="?android:attr/progressBarStyleHorizontal"
+        <!-- Header -->
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:indeterminate="true"
-            android:visibility="gone" />
+            android:background="#0F6E56"
+            android:padding="16dp">
 
+            <ImageView
+                android:id="@+id/ivBack"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_arrow_back"
+                android:layout_centerVertical="true"
+                app:tint="#E1F5EE"
+                android:contentDescription="Back" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_toEndOf="@id/ivBack"
+                android:layout_marginStart="24dp"
+                android:layout_centerVertical="true">
+
+                <TextView
+                    android:id="@+id/tvContestName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="KIU Leaderboard"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="#E1F5EE" />
+
+                <TextView
+                    android:id="@+id/tvLastUpdated"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Last updated: Never"
+                    android:textSize="11sp"
+                    android:textColor="#9FE1CB"
+                    android:layout_marginTop="2dp" />
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/ivRefresh"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_refresh"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                app:tint="#E1F5EE"
+                android:contentDescription="Refresh" />
+
+        </RelativeLayout>
+
+        <!-- Scanning Status Bar -->
+        <LinearLayout
+            android:id="@+id/layoutStatusBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="#E1F5EE"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="10dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tvStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Scanning Codeforces..."
+                android:textSize="12sp"
+                android:textColor="#0F6E56"
+                android:textStyle="bold" />
+
+            <ProgressBar
+                android:id="@+id/rankingProgressBar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="4dp"
+                android:layout_marginStart="12dp"
+                android:indeterminate="true"
+                android:progressTint="#0F6E56"
+                android:progressBackgroundTint="#B0D8D8" />
+
+        </LinearLayout>
+
+        <!-- Table Header -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:padding="8dp"
-            android:background="?attr/colorSurfaceVariant">
+            android:background="#085041"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp"
+            android:gravity="center_vertical">
 
             <TextView
                 android:layout_width="40dp"
                 android:layout_height="wrap_content"
                 android:text="Rank"
-                android:textStyle="bold" />
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="#9FE1CB" />
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="User Name"
+                android:textSize="13sp"
                 android:textStyle="bold"
-                android:paddingStart="8dp" />
+                android:textColor="#9FE1CB"
+                android:paddingStart="12dp" />
 
             <TextView
-                android:layout_width="60dp"
+                android:id="@+id/tvHeaderScore"
+                android:layout_width="70dp"
                 android:layout_height="wrap_content"
                 android:text="Rating"
+                android:textSize="13sp"
                 android:textStyle="bold"
+                android:textColor="#9FE1CB"
                 android:gravity="end" />
+
         </LinearLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvCfRankings"
+        <!-- Rankings List with SwipeRefresh -->
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipeRefresh"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvCfRankings"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingHorizontal="12dp"
+                android:paddingTop="12dp"
+                android:clipToPadding="false" />
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     </LinearLayout>
-</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <!-- Floating Action Button at Bottom Center -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabScrollToMe"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="16dp"
+        android:src="@drawable/ic_arrow_down"
+        app:backgroundTint="#424242"
+        app:tint="#FFFFFF"
+        app:fabSize="mini"
+        android:contentDescription="Scroll to me" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

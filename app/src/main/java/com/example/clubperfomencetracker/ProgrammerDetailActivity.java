@@ -1,6 +1,5 @@
 package com.example.clubperfomencetracker;
 
-import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -22,7 +21,7 @@ import okhttp3.Response;
 public class ProgrammerDetailActivity extends AppCompatActivity {
     private TextView tvName, tvCfId, tvMaxRating;
     private OkHttpClient client;
-    private ProgressDialog progressDialog;
+    private LoadingDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +39,7 @@ public class ProgrammerDetailActivity extends AppCompatActivity {
         tvMaxRating = findViewById(R.id.tvDetailMaxRating);
 
         client = new OkHttpClient();
-        progressDialog = new ProgressDialog(this);
+        progressDialog = new LoadingDialog(this);
         progressDialog.setMessage("Fetching user details...");
 
         if (handle != null) {
@@ -90,15 +89,15 @@ public class ProgrammerDetailActivity extends AppCompatActivity {
                         JSONObject user = result.getJSONObject(0);
                         String firstName = user.optString("firstName", "");
                         String lastName = user.optString("lastName", "");
-                        String name = (firstName + " " + lastName).trim();
-                        if (name.isEmpty()) name = handle;
+                        String combinedName = (firstName + " " + lastName).trim();
+                        final String nameToDisplay = combinedName.isEmpty() ? handle : combinedName;
                         
-                        int maxRating = user.optInt("maxRating", 0);
-                        int currentRating = user.optInt("rating", 0);
+                        final int maxRating = user.optInt("maxRating", 0);
+                        final int currentRating = user.optInt("rating", 0);
                         
                         runOnUiThread(() -> {
                             progressDialog.dismiss();
-                            tvName.setText(name);
+                            tvName.setText(nameToDisplay);
                             tvMaxRating.setText("Max Rating: " + maxRating + " | Current: " + currentRating);
                         });
                     } else {

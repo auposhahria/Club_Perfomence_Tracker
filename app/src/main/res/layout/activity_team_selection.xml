@@ -1,69 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:background="@color/surface_bg">
 
-    <TextView
-        android:id="@+id/tvContestName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Team Selection Contest"
-        android:textAppearance="?attr/textAppearanceHeadlineSmall"
-        android:layout_marginBottom="16dp" />
-
-    <HorizontalScrollView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?attr/colorSurfaceVariant">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <LinearLayout
-            android:layout_width="wrap_content"
+        <!-- Header -->
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="8dp">
+            android:background="@color/primary"
+            android:padding="16dp">
+
+            <ImageView
+                android:id="@+id/ivBack"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_arrow_back"
+                android:layout_centerVertical="true"
+                app:tint="@color/white"
+                android:contentDescription="Back" />
 
             <TextView
-                android:layout_width="50dp"
+                android:id="@+id/tvContestName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/ivBack"
+                android:layout_marginStart="20dp"
+                android:layout_centerVertical="true"
+                android:text="Team Selection Contest"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </RelativeLayout>
+
+        <!-- Table Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="#085041"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp">
+
+            <TextView
+                android:layout_width="40dp"
                 android:layout_height="wrap_content"
                 android:text="Rank"
+                android:textColor="#9FE1CB"
+                android:textSize="12sp"
                 android:textStyle="bold" />
 
             <TextView
-                android:layout_width="120dp"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="User Name"
+                android:textColor="#9FE1CB"
+                android:textSize="12sp"
                 android:textStyle="bold"
-                android:paddingStart="8dp" />
+                android:paddingStart="12dp" />
 
             <TextView
-                android:layout_width="70dp"
+                android:layout_width="60dp"
                 android:layout_height="wrap_content"
                 android:text="Score"
+                android:textColor="#9FE1CB"
+                android:textSize="12sp"
                 android:textStyle="bold"
                 android:gravity="end" />
 
             <TextView
-                android:layout_width="100dp"
-                android:layout_height="wrap_content"
-                android:text="Date"
-                android:textStyle="bold"
-                android:gravity="center" />
-
-            <TextView
-                android:layout_width="80dp"
+                android:layout_width="60dp"
                 android:layout_height="wrap_content"
                 android:text="Weight"
+                android:textColor="#9FE1CB"
+                android:textSize="12sp"
                 android:textStyle="bold"
                 android:gravity="end" />
         </LinearLayout>
-    </HorizontalScrollView>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvTeamRankings"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvTeamRankings"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingTop="8dp"
+            android:clipToPadding="false" />
+    </LinearLayout>
 
-</LinearLayout>
+    <ProgressBar
+        android:id="@+id/rankingProgressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone"
+        android:indeterminateTint="@color/primary" />
+
+</RelativeLayout>

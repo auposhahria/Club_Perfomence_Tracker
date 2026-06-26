@@ -6,11 +6,22 @@
         <item name="colorOnSecondary">@color/white</item>
         <item name="colorTertiary">@color/accent</item>
         <item name="colorSurface">@color/surface_card</item>
-        <item name="colorBackground">@color/surface_bg</item>
+        <item name="android:colorBackground">@color/surface_bg</item>
         <item name="colorOnBackground">@color/text_primary</item>
         <item name="android:statusBarColor">@color/primary_dark</item>
         <item name="android:navigationBarColor">@color/white</item>
     </style>
 
     <style name="Theme.ClubPerfomenceTracker" parent="Base.Theme.ClubPerfomenceTracker" />
+
+    <!-- Pill indicator behind active icon -->
+    <style name="NavPillIndicator">
+        <item name="android:color">@color/nav_pill</item>
+        <item name="shapeAppearance">@style/NavPillShape</item>
+    </style>
+
+    <style name="NavPillShape">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
 </resources>

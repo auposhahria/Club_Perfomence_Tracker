@@ -1,11 +1,10 @@
 package com.example.clubperfomencetracker;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -39,27 +38,41 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
         bottomNav.setOnItemSelectedListener(item -> {
+            // animate the selected icon
+            View view = bottomNav.findViewById(item.getItemId());
+            if (view != null) {
+                view.animate()
+                    .scaleX(1.15f).scaleY(1.15f)
+                    .setDuration(120)
+                    .withEndAction(() ->
+                        view.animate()
+                            .scaleX(1f).scaleY(1f)
+                            .setDuration(100)
+                            .start()
+                    ).start();
+            }
+
             Fragment selectedFragment = null;
             String title = "";
             int itemId = item.getItemId();
 
             if (itemId == R.id.nav_home) {
                 selectedFragment = new HomeFragment();
-                title = "Dashboard";
+                title = "Home";
             } else if (itemId == R.id.nav_events) {
                 selectedFragment = new EventsFragment();
-                title = "Contests & Events";
-            } else if (itemId == R.id.nav_programmers) {
+                title = "Events";
+            } else if (itemId == R.id.nav_code) {
                 selectedFragment = new ProgrammersFragment();
-                title = "KIU Programmers";
+                title = "Code";
             } else if (itemId == R.id.nav_blog) {
                 selectedFragment = new BlogFragment();
-                title = "Community Blog";
+                title = "Blog";
             } else if (itemId == R.id.nav_ladder) {
                 selectedFragment = new LadderFragment();
-                title = "Problem Ladder";
+                title = "Ladder";
             }
 
             if (selectedFragment != null) {
@@ -70,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Set default fragment
         if (savedInstanceState == null) {
-            updateFragment(new HomeFragment(), "Dashboard");
+            updateFragment(new HomeFragment(), "Home");
         }
     }
 
@@ -92,10 +105,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
-        if (itemId == R.id.action_profile) {
-            startActivity(new Intent(this, ProfileActivity.class));
-            return true;
-        } else if (itemId == R.id.action_logout) {
+        if (itemId == R.id.action_logout) {
             FirebaseAuth.getInstance().signOut();
             startActivity(new Intent(this, LoginActivity.class));
             finish();

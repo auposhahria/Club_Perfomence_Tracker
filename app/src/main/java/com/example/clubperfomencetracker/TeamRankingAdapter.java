@@ -32,11 +32,11 @@ public class TeamRankingAdapter extends RecyclerView.Adapter<TeamRankingAdapter.
     @Override
     public void onBindViewHolder(@NonNull TeamRankingViewHolder holder, int position) {
         Ranking ranking = rankingList.get(position);
-        holder.tvRank.setText(String.valueOf(ranking.getRank()));
+        holder.tvRank.setText(ranking.getRank() <= 0 ? "-" : String.valueOf(ranking.getRank()));
         holder.tvUserName.setText(ranking.getUserName());
-        holder.tvScore.setText(String.valueOf(ranking.getScore()));
-        holder.tvDate.setText(ranking.getDate());
-        holder.tvWeight.setText(String.valueOf(ranking.getWeight()));
+        holder.tvScore.setText(ranking.getScore() < 0 ? "-" : String.valueOf(ranking.getScore()));
+        holder.tvDate.setText(ranking.getRank() <= 0 ? "-" : ranking.getDate());
+        holder.tvWeight.setText(ranking.getRank() <= 0 ? "-" : String.valueOf(ranking.getWeight()));
 
         holder.tvUserName.setOnClickListener(v -> {
             if (listener != null) {

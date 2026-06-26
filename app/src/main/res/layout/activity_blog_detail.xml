@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#F4FAFA">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -10,36 +11,157 @@
         android:orientation="vertical"
         android:padding="20dp">
 
+        <!-- Category Badge -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ARTICLE"
+            android:textSize="11sp"
+            android:textColor="#0F6E56"
+            android:textStyle="bold"
+            android:background="@drawable/bg_badge_teal"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="4dp"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Title -->
         <TextView
             android:id="@+id/tvFullTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="?attr/textAppearanceHeadlineMedium"
+            android:textSize="22sp"
             android:textStyle="bold"
+            android:textColor="#04342C"
+            android:lineSpacingExtra="2dp"
             android:text="Blog Title" />
 
-        <TextView
-            android:id="@+id/tvFullAuthorDate"
+        <!-- Author + Date Row -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="?attr/textAppearanceBodySmall"
-            android:textColor="?android:attr/textColorSecondary"
-            android:layout_marginTop="8dp"
-            android:text="By Author | Oct 27, 2023" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="16dp">
 
+            <TextView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:gravity="center"
+                android:text="AU"
+                android:textSize="11sp"
+                android:textColor="#E1F5EE"
+                android:textStyle="bold"
+                android:background="@drawable/bg_avatar_circle" />
+
+            <TextView
+                android:id="@+id/tvAuthorName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:textColor="#085041"
+                android:layout_marginStart="8dp"
+                android:text="By Author" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" · "
+                android:textColor="#5DCAA5"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/tvFullAuthorDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:textColor="#5DCAA5"
+                android:text="Oct 27, 2023" />
+
+        </LinearLayout>
+
+        <!-- Teal Divider -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="?android:attr/dividerVertical"
-            android:layout_marginVertical="16dp" />
+            android:background="@drawable/divider_teal_fade"
+            android:layout_marginBottom="16dp" />
 
+        <!-- Main Content -->
         <TextView
             android:id="@+id/tvFullContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="?attr/textAppearanceBodyLarge"
-            android:lineSpacingExtra="4dp"
+            android:textSize="15sp"
+            android:textColor="#085041"
+            android:lineSpacingExtra="6dp"
             android:text="Full blog content goes here..." />
+
+        <!-- Pull Quote Block -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="#E1F5EE"
+            android:layout_marginVertical="20dp"
+            android:padding="14dp">
+
+            <View
+                android:layout_width="3dp"
+                android:layout_height="match_parent"
+                android:background="#0F6E56"
+                android:layout_marginEnd="12dp" />
+
+            <TextView
+                android:id="@+id/tvPullQuote"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
+                android:textColor="#085041"
+                android:textStyle="italic"
+                android:lineSpacingExtra="4dp"
+                android:text="A key insight from the article goes here..." />
+
+        </LinearLayout>
+
+        <!-- Bottom Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#B0D8D8"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Action Buttons Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="4dp">
+
+            <Button
+                android:id="@+id/btnLike"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_weight="1"
+                android:text="♥  Like"
+                android:textColor="#E1F5EE"
+                android:textSize="13sp"
+                android:backgroundTint="#0F6E56"
+                android:layout_marginEnd="8dp" />
+
+            <Button
+                android:id="@+id/btnShare"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_weight="1"
+                android:text="↗  Share"
+                android:textColor="#0F6E56"
+                android:textSize="13sp"
+                android:backgroundTint="#E1F5EE"
+                style="@style/Widget.Material3.Button.OutlinedButton" />
+
+        </LinearLayout>
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

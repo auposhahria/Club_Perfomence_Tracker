@@ -3,29 +3,71 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="2dp">
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="6dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="0dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="#E5E7EB">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical">
 
-        <TextView
-            android:id="@+id/tvEventName"
-            android:layout_width="wrap_content"
+        <!-- Icon Box -->
+        <FrameLayout
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_icon_box_teal">
+            <ImageView
+                android:id="@+id/ivEventIcon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_crown"
+                app:tint="#0D6759" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Contest Name"
-            android:textAppearance="?attr/textAppearanceTitleMedium" />
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="16dp">
+
+            <TextView
+                android:id="@+id/tvEventName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Contest Name"
+                android:textColor="#111827"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvEventDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Oct 27, 2023"
+                android:textColor="#14B8A6"
+                android:textSize="13sp"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/tvEventType"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Event Type"
-            android:textAppearance="?attr/textAppearanceBodyMedium"
-            android:textColor="?android:attr/textColorSecondary" />
+            android:text="Type"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="4dp"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:background="@drawable/bg_status_badge"
+            android:textColor="@color/attendance_present_text" />
+
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

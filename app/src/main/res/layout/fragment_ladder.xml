@@ -32,6 +32,15 @@
         <com.google.android.material.tabs.TabItem android:text="1000" />
     </com.google.android.material.tabs.TabLayout>
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSyncCodeforces"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="Sync Solved Status with Codeforces"
+        app:icon="@drawable/ic_refresh"
+        style="@style/Widget.MaterialComponents.Button.TextButton" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvLadder"
         android:layout_width="match_parent"

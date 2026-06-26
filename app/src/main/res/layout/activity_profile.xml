@@ -23,7 +23,7 @@
             <ImageView
                 android:layout_width="100dp"
                 android:layout_height="100dp"
-                android:src="@android:drawable/sym_def_app_icon"
+                android:src="@drawable/ic_profile"
                 android:layout_marginBottom="16dp" />
 
             <TextView
@@ -46,7 +46,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Coding Profiles"
+        android:text="Profile Details"
         android:textAppearance="?attr/textAppearanceTitleLarge"
         android:layout_marginTop="24dp"
         android:layout_marginBottom="12dp" />
@@ -62,11 +62,32 @@
             android:layout_height="wrap_content" />
     </com.google.android.material.textfield.TextInputLayout>
 
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="RFID Tag UID"
+        android:layout_marginTop="12dp"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etProfileRfidTag"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </com.google.android.material.textfield.TextInputLayout>
+
     <Button
         android:id="@+id/btnSaveProfile"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Save Changes"
         android:layout_marginTop="24dp" />
+
+    <Button
+        android:id="@+id/btnResetPassword"
+        style="@style/Widget.Material3.Button.TextButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Reset Password via Email"
+        android:layout_marginTop="8dp"
+        android:textColor="?attr/colorPrimary" />
 
 </LinearLayout>

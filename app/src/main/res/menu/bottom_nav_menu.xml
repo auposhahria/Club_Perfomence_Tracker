@@ -1,23 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:id="@+id/nav_home"
-        android:icon="@android:drawable/ic_menu_today"
+    <item android:id="@+id/nav_home"
+        android:icon="@drawable/ic_nav_home"
         android:title="Home" />
-    <item
-        android:id="@+id/nav_events"
-        android:icon="@android:drawable/ic_menu_agenda"
+    <item android:id="@+id/nav_events"
+        android:icon="@drawable/ic_nav_events"
         android:title="Events" />
-    <item
-        android:id="@+id/nav_programmers"
-        android:icon="@android:drawable/ic_menu_myplaces"
-        android:title="Programmers" />
-    <item
-        android:id="@+id/nav_blog"
-        android:icon="@android:drawable/ic_menu_edit"
+    <item android:id="@+id/nav_code"
+        android:icon="@drawable/ic_nav_code"
+        android:title="Code" />
+    <item android:id="@+id/nav_blog"
+        android:icon="@drawable/ic_nav_blog"
         android:title="Blog" />
-    <item
-        android:id="@+id/nav_ladder"
-        android:icon="@android:drawable/ic_menu_sort_by_size"
+    <item android:id="@+id/nav_ladder"
+        android:icon="@drawable/ic_nav_ladder"
         android:title="Ladder" />
 </menu>

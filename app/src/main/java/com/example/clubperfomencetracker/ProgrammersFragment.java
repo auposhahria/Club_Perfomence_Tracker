@@ -17,28 +17,26 @@ import java.util.List;
 public class ProgrammersFragment extends Fragment {
     
     private ProgrammerAdapter adapter;
-    private List<Programmer> programmers;
+    private List<Programmer> programmerList = new ArrayList<>();
+    private RankingDatabaseHelper dbHelper;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_programmers, container, false);
         
+        dbHelper = new RankingDatabaseHelper(getContext());
         RecyclerView rvProgrammers = view.findViewById(R.id.rvProgrammers);
         SearchView searchView = view.findViewById(R.id.searchView);
         
         rvProgrammers.setLayoutManager(new LinearLayoutManager(getContext()));
         
-        programmers = new ArrayList<>();
-        programmers.add(new Programmer("John Doe", "johndoe123", 1500));
-        programmers.add(new Programmer("Jane Smith", "jsmith_pro", 2100));
-        programmers.add(new Programmer("Alice Johnson", "alice_j", 1800));
-        programmers.add(new Programmer("Bob Brown", "bbrown", 1200));
+        loadProgrammersFromDB();
         
-        adapter = new ProgrammerAdapter(programmers, programmer -> {
+        adapter = new ProgrammerAdapter(programmerList, programmer -> {
             Intent intent = new Intent(getActivity(), ProgrammerDetailActivity.class);
             intent.putExtra("NAME", programmer.getName());
-            intent.putExtra("CF_ID", programmer.getCfId());
+            intent.putExtra("CF_HANDLE", programmer.getCfId());
             intent.putExtra("MAX_RATING", programmer.getMaxRating());
             startActivity(intent);
         });
@@ -59,5 +57,13 @@ public class ProgrammersFragment extends Fragment {
         });
         
         return view;
+    }
+
+    private void loadProgrammersFromDB() {
+        List<Ranking> rankings = dbHelper.getAllRankings();
+        programmerList.clear();
+        for (Ranking r : rankings) {
+            programmerList.add(new Programmer(r.getUserName(), r.getUserName(), r.getScore()));
+        }
     }
 }

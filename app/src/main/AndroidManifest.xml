@@ -36,6 +36,8 @@
         <activity android:name=".BlogDetailActivity" />
         <activity android:name=".ProfileActivity" />
         <activity android:name=".ClassHistoryActivity" />
+        <activity android:name=".AdminMainActivity" />
+        <activity android:name=".AddClassActivity" />
 
     </application>
 

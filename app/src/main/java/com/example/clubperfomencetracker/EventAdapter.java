@@ -1,8 +1,10 @@
 package com.example.clubperfomencetracker;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -34,6 +36,14 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         Event event = eventList.get(position);
         holder.tvName.setText(event.getName());
         holder.tvType.setText(event.getType());
+        holder.tvDate.setText(event.getDate());
+        
+        if ("Team Selection".equals(event.getType())) {
+            holder.ivIcon.setImageResource(R.drawable.ic_crown);
+        } else {
+            holder.ivIcon.setImageResource(R.drawable.ic_calendar);
+        }
+        
         holder.itemView.setOnClickListener(v -> listener.onEventClick(event));
     }
 
@@ -43,12 +53,15 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
     }
 
     static class EventViewHolder extends RecyclerView.ViewHolder {
-        TextView tvName, tvType;
+        TextView tvName, tvType, tvDate;
+        ImageView ivIcon;
 
         public EventViewHolder(@NonNull View itemView) {
             super(itemView);
             tvName = itemView.findViewById(R.id.tvEventName);
             tvType = itemView.findViewById(R.id.tvEventType);
+            tvDate = itemView.findViewById(R.id.tvEventDate);
+            ivIcon = itemView.findViewById(R.id.ivEventIcon);
         }
     }
 }

@@ -43,6 +43,8 @@ dependencies {
 
     // Networking
     implementation libs.okhttp
+    implementation libs.retrofit
+    implementation libs.retrofit.gson
     
     // UI Components
     implementation libs.androidx.swiperefreshlayout

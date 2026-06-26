@@ -1,11 +1,13 @@
 package com.example.clubperfomencetracker;
 
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
@@ -28,14 +30,29 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
     public void onBindViewHolder(@NonNull ClassViewHolder holder, int position) {
         ClassRecord record = classList.get(position);
         holder.tvTopic.setText(record.getTopic());
-        holder.tvDateInstructor.setText(record.getDate() + " | " + record.getInstructor());
+        holder.tvDate.setText(record.getDate());
         
-        if (record.wasAttended()) {
-            holder.tvStatus.setText("Attended");
-            holder.tvStatus.setTextColor(Color.parseColor("#4CAF50")); // Green
-        } else {
-            holder.tvStatus.setText("Absent");
-            holder.tvStatus.setTextColor(Color.parseColor("#F44336")); // Red
+        String status = record.getStatus();
+        holder.tvStatus.setText(status);
+
+        int bgColor;
+        int textColor;
+
+        if ("Present".equalsIgnoreCase(status)) {
+            bgColor = ContextCompat.getColor(holder.itemView.getContext(), R.color.attendance_present_bg);
+            textColor = ContextCompat.getColor(holder.itemView.getContext(), R.color.attendance_present_text);
+        } else if ("Absent".equalsIgnoreCase(status)) {
+            bgColor = ContextCompat.getColor(holder.itemView.getContext(), R.color.attendance_absent_bg);
+            textColor = ContextCompat.getColor(holder.itemView.getContext(), R.color.attendance_absent_text);
+        } else { // Late
+            bgColor = ContextCompat.getColor(holder.itemView.getContext(), R.color.attendance_late_bg);
+            textColor = ContextCompat.getColor(holder.itemView.getContext(), R.color.attendance_late_text);
+        }
+
+        holder.tvStatus.setTextColor(textColor);
+        GradientDrawable background = (GradientDrawable) holder.tvStatus.getBackground();
+        if (background != null) {
+            background.setColor(bgColor);
         }
     }
 
@@ -45,12 +62,12 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
     }
 
     static class ClassViewHolder extends RecyclerView.ViewHolder {
-        TextView tvTopic, tvDateInstructor, tvStatus;
+        TextView tvTopic, tvDate, tvStatus;
 
         public ClassViewHolder(@NonNull View itemView) {
             super(itemView);
             tvTopic = itemView.findViewById(R.id.tvClassTopic);
-            tvDateInstructor = itemView.findViewById(R.id.tvClassDateInstructor);
+            tvDate = itemView.findViewById(R.id.tvClassDate);
             tvStatus = itemView.findViewById(R.id.tvAttendanceStatus);
         }
     }

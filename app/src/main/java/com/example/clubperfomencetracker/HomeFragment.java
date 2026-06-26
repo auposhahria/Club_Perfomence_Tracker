@@ -40,7 +40,7 @@ public class HomeFragment extends Fragment {
     private DatabaseReference mDatabase;
     private FirebaseAuth mAuth;
     private OkHttpClient client;
-    private TextView tvCfRating, tvCfRank;
+    private TextView tvCfRating, tvCfRank, tvTotalClasses, tvAttendedClasses;
     private MaterialCardView cardCfRating;
     private String currentCfHandle = "";
 
@@ -53,8 +53,8 @@ public class HomeFragment extends Fragment {
         mDatabase = FirebaseDatabase.getInstance().getReference();
         client = new OkHttpClient();
 
-        TextView tvTotalClasses = view.findViewById(R.id.tvTotalClasses);
-        TextView tvAttendedClasses = view.findViewById(R.id.tvAttendedClasses);
+        tvTotalClasses = view.findViewById(R.id.tvTotalClasses);
+        tvAttendedClasses = view.findViewById(R.id.tvAttendedClasses);
         tvCfRating = view.findViewById(R.id.tvCfRating);
         tvCfRank = view.findViewById(R.id.tvCfRank);
         TextView tvClubRating = view.findViewById(R.id.tvClubRating);
@@ -68,33 +68,28 @@ public class HomeFragment extends Fragment {
 
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
+            // Load Profile Data
             mDatabase.child("users").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     User user = snapshot.getValue(User.class);
                     if (user != null) {
                         currentCfHandle = user.cfHandle;
-                        tvWelcome.setText("Welcome, " + user.name + " (" + user.cfHandle + ")");
-                        tvTotalClasses.setText(String.valueOf(user.totalClasses));
-                        tvAttendedClasses.setText(String.valueOf(user.attendedClasses));
+                        tvWelcome.setText("Welcome, " + user.name);
                         tvClubRating.setText(String.valueOf(user.clubRating));
                         
                         if (user.cfHandle != null && !user.cfHandle.isEmpty()) {
                             fetchCodeforcesRating(user.cfHandle);
-                        } else {
-                            tvCfRating.setText("N/A");
-                            if (tvCfRank != null) tvCfRank.setText("No Handle");
                         }
                     }
                 }
 
                 @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    if (getContext() != null) {
-                        Toast.makeText(getContext(), "Failed to load user data.", Toast.LENGTH_SHORT).show();
-                    }
-                }
+                public void onCancelled(@NonNull DatabaseError error) {}
             });
+
+            // Calculate Dynamic Attendance Stats
+            fetchAttendanceStats(currentUser.getUid());
         }
 
         // Ladder Progress Logic
@@ -129,114 +124,82 @@ public class HomeFragment extends Fragment {
             });
         }
 
+        View ivProfileAvatar = view.findViewById(R.id.ivProfileAvatar);
+        if (ivProfileAvatar != null) {
+            ivProfileAvatar.setOnClickListener(v -> {
+                startActivity(new Intent(getActivity(), ProfileActivity.class));
+            });
+        }
+
         return view;
+    }
+
+    private void fetchAttendanceStats(String uid) {
+        // Count total classes
+        mDatabase.child("classes").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                tvTotalClasses.setText(String.valueOf(snapshot.getChildrenCount()));
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
+
+        // Count attended classes
+        mDatabase.child("attendance_user").child(uid).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                tvAttendedClasses.setText(String.valueOf(snapshot.getChildrenCount()));
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
     }
 
     private void fetchCodeforcesRating(String handle) {
         String url = "https://codeforces.com/api/user.info?handles=" + handle;
-        Request request = new Request.Builder()
-                .url(url)
-                .header("Accept", "application/json")
-                .build();
+        Request request = new Request.Builder().url(url).build();
 
         client.newCall(request).enqueue(new Callback() {
             @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                if (getActivity() != null) {
-                    getActivity().runOnUiThread(() -> {
-                        tvCfRating.setText("--");
-                        if (tvCfRank != null) tvCfRank.setText("Offline");
-                    });
-                }
-            }
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {}
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (!response.isSuccessful() || response.body() == null) {
-                    if (getActivity() != null) {
-                        getActivity().runOnUiThread(() -> {
-                            tvCfRating.setText("--");
-                            if (tvCfRank != null) tvCfRank.setText("Error");
-                        });
-                    }
-                    return;
-                }
-                
+                if (!response.isSuccessful() || response.body() == null) return;
                 try {
-                    String jsonData = response.body().string();
-                    JSONObject jsonObject = new JSONObject(jsonData);
-                    
-                    if (!"OK".equals(jsonObject.getString("status"))) {
-                        if (getActivity() != null) {
-                            getActivity().runOnUiThread(() -> {
-                                tvCfRating.setText("--");
-                                if (tvCfRank != null) tvCfRank.setText("N/A");
-                            });
-                        }
-                        return;
-                    }
-                    
-                    JSONArray result = jsonObject.getJSONArray("result");
-                    if (result.length() > 0) {
-                        JSONObject userInfo = result.getJSONObject(0);
+                    JSONObject jsonObject = new JSONObject(response.body().string());
+                    if ("OK".equals(jsonObject.getString("status"))) {
+                        JSONObject userInfo = jsonObject.getJSONArray("result").getJSONObject(0);
                         int rating = userInfo.optInt("rating", 0);
                         String rank = userInfo.optString("rank", "Unrated");
-                        
                         if (getActivity() != null) {
                             getActivity().runOnUiThread(() -> updateRatingUI(rating, rank));
                         }
-                    } else {
-                        if (getActivity() != null) {
-                            getActivity().runOnUiThread(() -> {
-                                tvCfRating.setText("--");
-                                if (tvCfRank != null) tvCfRank.setText("Not Found");
-                            });
-                        }
                     }
-                } catch (Exception e) {
-                    if (getActivity() != null) {
-                        getActivity().runOnUiThread(() -> {
-                            tvCfRating.setText("--");
-                            if (tvCfRank != null) tvCfRank.setText("Error");
-                        });
-                    }
-                }
+                } catch (Exception ignored) {}
             }
         });
     }
 
     private void updateRatingUI(int rating, String rank) {
-        if (rating == 0) {
-            tvCfRating.setText("Unrated");
-        } else {
-            tvCfRating.setText(String.valueOf(rating));
-        }
-        
-        if (tvCfRank != null && rank != null && !rank.isEmpty()) {
+        tvCfRating.setText(rating == 0 ? "Unrated" : String.valueOf(rating));
+        if (tvCfRank != null && rank != null) {
             tvCfRank.setText(rank.substring(0, 1).toUpperCase() + rank.substring(1));
         }
-        
-        int color;
-        if (rating < 1200) {
-            color = Color.parseColor("#808080"); // Newbie (Gray)
-        } else if (rating < 1400) {
-            color = Color.parseColor("#008000"); // Pupil (Green)
-        } else if (rating < 1600) {
-            color = Color.parseColor("#03a89e"); // Specialist (Cyan)
-        } else if (rating < 1900) {
-            color = Color.parseColor("#0000FF"); // Expert (Blue)
-        } else if (rating < 2100) {
-            color = Color.parseColor("#aa00aa"); // Candidate Master (Violet)
-        } else if (rating < 2300) {
-            color = Color.parseColor("#ff8c00"); // Master (Orange)
-        } else {
-            color = Color.parseColor("#FF0000"); // Grandmaster+ (Red)
-        }
-        
+        int color = getCfColor(rating);
         tvCfRating.setTextColor(color);
         if (tvCfRank != null) tvCfRank.setTextColor(color);
-        if (cardCfRating != null) {
-            cardCfRating.setStrokeColor(color);
-        }
+        if (cardCfRating != null) cardCfRating.setStrokeColor(color);
+    }
+
+    private int getCfColor(int rating) {
+        if (rating < 1200) return Color.GRAY;
+        if (rating < 1400) return Color.parseColor("#008000");
+        if (rating < 1600) return Color.parseColor("#03a89e");
+        if (rating < 1900) return Color.BLUE;
+        if (rating < 2100) return Color.parseColor("#aa00aa");
+        if (rating < 2300) return Color.parseColor("#ff8c00");
+        return Color.RED;
     }
 }

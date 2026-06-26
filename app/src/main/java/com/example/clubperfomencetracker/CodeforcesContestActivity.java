@@ -3,48 +3,43 @@ package com.example.clubperfomencetracker;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.format.DateUtils;
-import android.util.JsonReader;
-import android.util.JsonToken;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import java.util.Set;
 
 public class CodeforcesContestActivity extends AppCompatActivity {
     private static final String TAG = "CF_Leaderboard";
     private RecyclerView rvCfRankings;
     private RankingAdapter adapter;
     private final List<Ranking> rankingList = new ArrayList<>();
-    private OkHttpClient client;
     private String currentHandle;
     private RankingDatabaseHelper dbHelper;
     private SwipeRefreshLayout swipeRefresh;
     private ProgressBar progressBar;
-    private TextView tvLastUpdated, tvStatus;
+    private TextView tvLastUpdated, tvStatus, tvContestName;
+    private View layoutStatusBar;
+    private ImageView ivBack, ivRefresh;
+    private FloatingActionButton fabScrollToMe;
     
-    private int scannedCount = 0;
-    private int foundCount = 0;
+    private int contestId = -1;
+    private ContestOrgRankFetcher fetcher;
+    private static final String TARGET_ORG = "Kishoreganj University of Science and Technology";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,40 +47,194 @@ public class CodeforcesContestActivity extends AppCompatActivity {
         setContentView(R.layout.activity_codeforces_contest);
 
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("KIU Leaderboard");
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().hide();
         }
 
         dbHelper = new RankingDatabaseHelper(this);
         currentHandle = getIntent().getStringExtra("CURRENT_HANDLE");
         if (currentHandle == null) currentHandle = "";
+        
+        contestId = getIntent().getIntExtra("CONTEST_ID", -1);
+        String eventName = getIntent().getStringExtra("EVENT_NAME");
+
+        tvContestName = findViewById(R.id.tvContestName);
+        if (eventName != null) {
+            tvContestName.setText(eventName);
+        } else if (contestId == -1) {
+            tvContestName.setText("KIU Global Leaderboard");
+        } else {
+            tvContestName.setText("Contest Leaderboard");
+        }
 
         tvLastUpdated = findViewById(R.id.tvLastUpdated);
         tvStatus = findViewById(R.id.tvStatus);
+        layoutStatusBar = findViewById(R.id.layoutStatusBar);
         progressBar = findViewById(R.id.rankingProgressBar);
         swipeRefresh = findViewById(R.id.swipeRefresh);
         rvCfRankings = findViewById(R.id.rvCfRankings);
+        ivBack = findViewById(R.id.ivBack);
+        ivRefresh = findViewById(R.id.ivRefresh);
+        fabScrollToMe = findViewById(R.id.fabScrollToMe);
+
+        TextView tvHeaderScore = findViewById(R.id.tvHeaderScore);
+        if (tvHeaderScore != null) {
+            if (contestId == -1) {
+                tvHeaderScore.setText("Rating");
+            } else {
+                tvHeaderScore.setText("Rating ∆");
+            }
+        }
         
+        ivBack.setOnClickListener(v -> finish());
+        ivRefresh.setOnClickListener(v -> refreshData());
+        fabScrollToMe.setOnClickListener(v -> scrollToMe());
+
         rvCfRankings.setLayoutManager(new LinearLayoutManager(this));
         adapter = new RankingAdapter(rankingList, handle -> {
             Intent intent = new Intent(CodeforcesContestActivity.this, ProgrammerDetailActivity.class);
             intent.putExtra("CF_HANDLE", handle);
+            intent.putExtra("NAME", handle);
             startActivity(intent);
         });
         rvCfRankings.setAdapter(adapter);
 
-        client = new OkHttpClient.Builder()
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(120, TimeUnit.SECONDS)
-                .build();
+        fetcher = new ContestOrgRankFetcher();
 
-        swipeRefresh.setOnRefreshListener(this::fetchOrganizationRankings);
+        swipeRefresh.setOnRefreshListener(this::refreshData);
 
-        loadFromCache();
-
-        if (rankingList.isEmpty()) {
-            fetchOrganizationRankings();
+        if (contestId == -1) {
+            loadFromCache();
+        } else {
+            refreshData();
         }
+    }
+
+    private void refreshData() {
+        if (contestId == -1) {
+            fetchGlobalData();
+        } else {
+            fetchContestData();
+        }
+    }
+
+    private void fetchGlobalData() {
+        layoutStatusBar.setVisibility(View.VISIBLE);
+        tvStatus.setText("Refreshing Global Stats...");
+        progressBar.setIndeterminate(true);
+        swipeRefresh.setRefreshing(true);
+
+        fetcher.fetchGlobalLeaderboard(TARGET_ORG, new ContestOrgRankFetcher.Callback() {
+            @Override
+            public void onSuccess(List<OrgRankResult> results) {
+                runOnUiThread(() -> {
+                    layoutStatusBar.setVisibility(View.GONE);
+                    swipeRefresh.setRefreshing(false);
+                    rankingList.clear();
+                    
+                    List<Ranking> toSave = new ArrayList<>();
+                    for (OrgRankResult res : results) {
+                        Ranking r = new Ranking(res.orgRank, res.handle, res.score, "Member", "", 0);
+                        if (res.handle.equalsIgnoreCase(currentHandle)) {
+                            r.setCurrentUser(true);
+                        }
+                        rankingList.add(r);
+                        toSave.add(r);
+                    }
+                    
+                    dbHelper.saveRankings(toSave);
+                    adapter.notifyDataSetChanged();
+                    updateLastUpdatedTime();
+                    
+                    if (currentHandle != null && !currentHandle.isEmpty()) {
+                        fabScrollToMe.show();
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String message) {
+                runOnUiThread(() -> {
+                    layoutStatusBar.setVisibility(View.GONE);
+                    swipeRefresh.setRefreshing(false);
+                    Toast.makeText(CodeforcesContestActivity.this, "Error: " + message, Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
+    }
+
+    private void fetchContestData() {
+        layoutStatusBar.setVisibility(View.VISIBLE);
+        tvStatus.setText("Loading member list...");
+        progressBar.setIndeterminate(false);
+        progressBar.setProgress(0);
+        swipeRefresh.setRefreshing(true);
+
+        // Get cached handles from the database (populated by KIU Global Leaderboard)
+        List<Ranking> cachedData = dbHelper.getAllRankings();
+        List<String> cachedHandles = new ArrayList<>();
+        final java.util.Map<String, String> rankTitleMap = new java.util.HashMap<>();
+        for (Ranking cached : cachedData) {
+            cachedHandles.add(cached.getUserName());
+            rankTitleMap.put(cached.getUserName().toLowerCase(), cached.getRankTitle());
+        }
+
+        fetcher.fetchOrgLeaderboard(contestId, TARGET_ORG, true, cachedHandles, new ContestOrgRankFetcher.Callback() {
+            @Override
+            public void onSuccess(List<OrgRankResult> results) {
+                runOnUiThread(() -> {
+                    layoutStatusBar.setVisibility(View.GONE);
+                    swipeRefresh.setRefreshing(false);
+                    rankingList.clear();
+                    
+                    for (OrgRankResult res : results) {
+                        String title = rankTitleMap.getOrDefault(res.handle.toLowerCase(), "Participant");
+                        Ranking r = new Ranking(res.orgRank, res.handle, res.score, title, "", 0);
+                        if (res.handle.equalsIgnoreCase(currentHandle)) {
+                            r.setCurrentUser(true);
+                        }
+                        rankingList.add(r);
+                    }
+                    
+                    adapter.notifyDataSetChanged();
+                    
+                    // Count participants (rank > 0)
+                    int participantCount = 0;
+                    for (OrgRankResult res : results) {
+                        if (res.orgRank > 0) participantCount++;
+                    }
+                    
+                    if (participantCount == 0) {
+                        Toast.makeText(CodeforcesContestActivity.this, "No KIU students found in this contest", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(CodeforcesContestActivity.this, participantCount + " KIU students participated!", Toast.LENGTH_SHORT).show();
+                    }
+                    
+                    updateLastUpdatedTime();
+                });
+            }
+
+            @Override
+            public void onError(String message) {
+                runOnUiThread(() -> {
+                    layoutStatusBar.setVisibility(View.GONE);
+                    swipeRefresh.setRefreshing(false);
+                    Toast.makeText(CodeforcesContestActivity.this, "Error: " + message, Toast.LENGTH_SHORT).show();
+                });
+            }
+
+            @Override
+            public void onProgress(int current, int total, String currentHandle) {
+                runOnUiThread(() -> {
+                    if (total > 0) {
+                        tvStatus.setText("Checking " + currentHandle + " (" + current + "/" + total + ")");
+                        progressBar.setMax(total);
+                        progressBar.setProgress(current);
+                    } else {
+                        tvStatus.setText(currentHandle);
+                    }
+                });
+            }
+        });
     }
 
     private void loadFromCache() {
@@ -93,185 +242,56 @@ public class CodeforcesContestActivity extends AppCompatActivity {
         String lastUpdated = dbHelper.getLastUpdated();
 
         if (lastUpdated != null) {
-            long time = Long.parseLong(lastUpdated);
-            CharSequence relativeTime = DateUtils.getRelativeTimeSpanString(time, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS);
-            tvLastUpdated.setText("Last updated: " + relativeTime);
+            try {
+                long time = Long.parseLong(lastUpdated);
+                CharSequence relativeTime = DateUtils.getRelativeTimeSpanString(time, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS);
+                tvLastUpdated.setText("Last updated: " + relativeTime);
+            } catch (Exception ignored) {}
         }
 
         rankingList.clear();
+        boolean handleFound = false;
         if (!cachedData.isEmpty()) {
             for (Ranking r : cachedData) {
                 if (r.getUserName().equalsIgnoreCase(currentHandle)) {
                     r.setCurrentUser(true);
+                    handleFound = true;
                 }
                 rankingList.add(r);
             }
         }
         adapter.notifyDataSetChanged();
-        scrollToMe();
-    }
-
-    private void fetchOrganizationRankings() {
-        scannedCount = 0;
-        foundCount = 0;
-        tvStatus.setVisibility(View.VISIBLE);
-        tvStatus.setText("Connecting to Codeforces...");
         
-        if (!swipeRefresh.isRefreshing()) {
-            progressBar.setVisibility(View.VISIBLE);
+        if (handleFound) {
+            fabScrollToMe.show();
+        } else {
+            fabScrollToMe.hide();
         }
-
-        Request request = new Request.Builder()
-                .url("https://codeforces.com/api/user.ratedList?activeOnly=false")
-                .header("User-Agent", "ClubPerformanceTracker/1.0")
-                .header("Accept", "application/json")
-                .build();
-
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                runOnUiThread(() -> {
-                    hideLoading();
-                    tvStatus.setText("Connection Failed");
-                    Toast.makeText(CodeforcesContestActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
-                });
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (!response.isSuccessful() || response.body() == null) {
-                    runOnUiThread(() -> {
-                        hideLoading();
-                        tvStatus.setText("Server Error");
-                    });
-                    return;
-                }
-
-                List<Ranking> liveList = new ArrayList<>();
-                try (JsonReader reader = new JsonReader(new InputStreamReader(response.body().byteStream(), StandardCharsets.UTF_8))) {
-                    reader.beginObject();
-                    while (reader.hasNext()) {
-                        String name = reader.nextName();
-                        if (name.equals("result")) {
-                            reader.beginArray();
-                            while (reader.hasNext()) {
-                                Ranking r = readUserFromStream(reader);
-                                scannedCount++;
-                                if (r != null) {
-                                    foundCount++;
-                                    liveList.add(r);
-                                    updateLiveUI(foundCount, scannedCount, liveList);
-                                } else if (scannedCount % 5000 == 0) {
-                                    updateLiveUI(foundCount, scannedCount, null);
-                                }
-                            }
-                            reader.endArray();
-                        } else {
-                            reader.skipValue();
-                        }
-                    }
-                    reader.endObject();
-
-                    // Final sort and save
-                    Collections.sort(liveList, (a, b) -> Integer.compare(b.getScore(), a.getScore()));
-                    for (int i = 0; i < liveList.size(); i++) {
-                        liveList.get(i).setRank(i + 1);
-                    }
-                    dbHelper.saveRankings(liveList);
-
-                    runOnUiThread(() -> {
-                        hideLoading();
-                        loadFromCache();
-                        tvStatus.setText("Sync Complete: " + foundCount + " members");
-                    });
-
-                } catch (Exception e) {
-                    Log.e(TAG, "Stream Error", e);
-                    runOnUiThread(() -> {
-                        hideLoading();
-                        tvStatus.setText("Update Incomplete");
-                    });
-                }
-            }
-        });
     }
 
-    private void updateLiveUI(int found, int scanned, List<Ranking> currentFound) {
-        runOnUiThread(() -> {
-            tvStatus.setText("Scanned: " + scanned + " | Found: " + found);
-            if (currentFound != null && !currentFound.isEmpty()) {
-                // To keep it smooth, only update list every few members or at intervals
-                if (found % 5 == 0 || scanned > 80000) {
-                    rankingList.clear();
-                    rankingList.addAll(currentFound);
-                    adapter.notifyDataSetChanged();
-                }
-            }
-        });
-    }
-
-    private void hideLoading() {
-        progressBar.setVisibility(View.GONE);
-        swipeRefresh.setRefreshing(false);
-    }
-
-    private Ranking readUserFromStream(JsonReader reader) throws IOException {
-        String handle = "";
-        int rating = 0;
-        String organization = "";
-
-        reader.beginObject();
-        while (reader.hasNext()) {
-            String name = reader.nextName();
-            if (reader.peek() == JsonToken.NULL) {
-                reader.skipValue();
-                continue;
-            }
-            switch (name) {
-                case "handle": 
-                    handle = reader.nextString(); 
-                    break;
-                case "rating": 
-                    rating = reader.nextInt(); 
-                    break;
-                case "organization":
-                    organization = reader.nextString();
-                    break;
-                default: 
-                    reader.skipValue(); 
-                    break;
-            }
+    private void updateLastUpdatedTime() {
+        dbHelper.updateLastUpdated();
+        String lastUpdated = dbHelper.getLastUpdated();
+        if (lastUpdated != null) {
+            long time = Long.parseLong(lastUpdated);
+            tvLastUpdated.setText("Last updated: " + DateUtils.getRelativeTimeSpanString(time));
         }
-        reader.endObject();
-        
-        // Check if user belongs to organization (KIU)
-        boolean belongsToOrg = false;
-        if (organization != null && !organization.isEmpty()) {
-            String orgLower = organization.toLowerCase();
-            if (orgLower.contains("kiu") || orgLower.contains("khulna") || organization.contains("47972")) {
-                belongsToOrg = true;
-            }
-        }
-        
-        // Only return users with valid handle and rating
-        if (!handle.isEmpty() && rating > 0 && belongsToOrg) {
-            return new Ranking(0, handle, rating, "", 0);
-        }
-        return null;
     }
 
     private void scrollToMe() {
         for (int i = 0; i < rankingList.size(); i++) {
-            if (rankingList.get(i).isCurrentUser()) {
-                rvCfRankings.scrollToPosition(i);
+            if (rankingList.get(i).getUserName().equalsIgnoreCase(currentHandle)) {
+                rvCfRankings.smoothScrollToPosition(i);
                 break;
             }
         }
     }
 
     @Override
-    public boolean onSupportNavigateUp() {
-        finish();
-        return true;
+    protected void onDestroy() {
+        super.onDestroy();
+        if (fetcher != null) {
+            fetcher.shutdown();
+        }
     }
 }
