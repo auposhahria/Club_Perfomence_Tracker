@@ -23,6 +23,7 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private DatabaseReference mDatabase;
     private LoadingDialog loadingBar;
+    private boolean isAttemptingAdminLogin = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,8 +41,15 @@ public class LoginActivity extends AppCompatActivity {
         TextView tvGoToSignUp = findViewById(R.id.tvGoToSignUp);
         TextView tvForgotPassword = findViewById(R.id.tvForgotPassword);
 
-        btnLogin.setOnClickListener(v -> performLogin(etEmail, etPassword));
-        btnAdminLogin.setOnClickListener(v -> performLogin(etEmail, etPassword));
+        btnLogin.setOnClickListener(v -> {
+            isAttemptingAdminLogin = false;
+            performLogin(etEmail, etPassword);
+        });
+
+        btnAdminLogin.setOnClickListener(v -> {
+            isAttemptingAdminLogin = true;
+            performLogin(etEmail, etPassword);
+        });
 
         tvForgotPassword.setOnClickListener(v -> {
             String email = etEmail.getText().toString().trim();
@@ -91,15 +99,28 @@ public class LoginActivity extends AppCompatActivity {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     loadingBar.dismiss();
-                    User userProfile = snapshot.getValue(User.class);
-                    if (userProfile != null && userProfile.isAdmin) {
+                    
+                    // Directly check for the field to ensure accuracy
+                    Boolean isAdmin = snapshot.child("isAdmin").getValue(Boolean.class);
+                    if (isAdmin == null) isAdmin = false;
+
+                    if (isAttemptingAdminLogin && !isAdmin) {
+                        // User tried to log in as admin but isn't one
+                        FirebaseAuth.getInstance().signOut();
+                        new AlertDialog.Builder(LoginActivity.this)
+                                .setTitle("Access Denied")
+                                .setMessage("This account does not have Admin privileges. If you are an admin, ensure 'isAdmin: true' is set in the database.")
+                                .setPositiveButton("OK", null)
+                                .show();
+                    } else if (isAdmin) {
                         Toast.makeText(LoginActivity.this, "Admin Login Successful!", Toast.LENGTH_SHORT).show();
                         startActivity(new Intent(LoginActivity.this, AdminMainActivity.class));
+                        finish();
                     } else {
                         Toast.makeText(LoginActivity.this, "Login Successful!", Toast.LENGTH_SHORT).show();
                         startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                        finish();
                     }
-                    finish();
                 }
 
                 @Override
@@ -118,7 +139,7 @@ public class LoginActivity extends AppCompatActivity {
         } else if (e instanceof FirebaseAuthInvalidCredentialsException) {
             errorMessage = "Invalid credentials.";
         } else {
-            errorMessage = "Authentication failed.";
+            errorMessage = e != null ? e.getMessage() : "Authentication failed.";
         }
         
         new AlertDialog.Builder(this)
