@@ -31,8 +31,7 @@ public class ContestOrgRankFetcher {
     }
 
     /**
-     * Fetches contest standings for each KIU member one-by-one.
-     * Reverting to the Rating History approach as requested.
+     * Fetches contest standings for each KIU member one-by-one
      * Uses Rating Delta as the score.
      */
     public void fetchOrgLeaderboard(int contestId,
@@ -44,7 +43,7 @@ public class ContestOrgRankFetcher {
         executor.execute(() -> {
             try {
                 final String displayOrg = (targetOrg != null && !targetOrg.isEmpty()) 
-                        ? targetOrg : "Kishoreganj University of Science and Technology";
+                        ? targetOrg : "Kishoreganj University";
 
                 List<String> orgMembers;
                 if (cachedHandles != null && !cachedHandles.isEmpty()) {
@@ -141,7 +140,7 @@ public class ContestOrgRankFetcher {
         executor.execute(() -> {
             try {
                 final String displayOrg = (targetOrg != null && !targetOrg.isEmpty()) 
-                        ? targetOrg : "Kishoreganj University of Science and Technology";
+                        ? targetOrg : "Kishoreganj University";
                 
                 List<String> handles = api.fetchOrganizationMembers("47972");
                 if (handles == null || handles.isEmpty()) {

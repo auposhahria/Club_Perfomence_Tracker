@@ -88,11 +88,11 @@ public class HomeFragment extends Fragment {
                 public void onCancelled(@NonNull DatabaseError error) {}
             });
 
-            // Calculate Dynamic Attendance Stats
+
             fetchAttendanceStats(currentUser.getUid());
         }
 
-        // Ladder Progress Logic
+
         SharedPreferences ladderPrefs = getActivity().getSharedPreferences("ProblemLadderPrefs", Context.MODE_PRIVATE);
         String[] sampleProblems = {"Watermelon", "Way Too Long Words", "Team", "Next Round", "Bit++", 
                                   "Football", "Even Odds", "HQ9+", "Theatre Square", "Lucky Division", "Chat room"};

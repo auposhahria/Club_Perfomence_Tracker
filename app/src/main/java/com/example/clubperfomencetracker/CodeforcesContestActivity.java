@@ -39,7 +39,7 @@ public class CodeforcesContestActivity extends AppCompatActivity {
     
     private int contestId = -1;
     private ContestOrgRankFetcher fetcher;
-    private static final String TARGET_ORG = "Kishoreganj University of Science and Technology";
+    private static final String TARGET_ORG = "Kishoreganj University";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
