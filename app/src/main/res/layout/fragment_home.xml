@@ -3,14 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/surface_bg">
+    android:background="@color/surface_bg"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Dark Header Section -->
+        <!-- Responsive Header Section -->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -18,19 +19,6 @@
             android:paddingHorizontal="20dp"
             android:paddingTop="24dp"
             android:paddingBottom="28dp">
-
-            <TextView
-                android:id="@+id/tvWelcome"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Welcome!"
-                android:textColor="@color/white"
-                android:textStyle="bold"
-                android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:layout_toStartOf="@+id/ivProfileAvatar"
-                android:layout_marginEnd="16dp" />
 
             <ImageView
                 android:id="@+id/ivProfileAvatar"
@@ -43,6 +31,21 @@
                 app:tint="@color/white"
                 android:padding="8dp"
                 android:contentDescription="Profile" />
+
+            <TextView
+                android:id="@+id/tvWelcome"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_toStartOf="@id/ivProfileAvatar"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="12dp"
+                android:text="Welcome!"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                android:ellipsize="end"
+                android:maxLines="2" />
         </RelativeLayout>
 
         <LinearLayout
@@ -55,10 +58,10 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="12dp"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
-                app:strokeWidth="1.5dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="1dp"
                 app:strokeColor="@color/primary"
                 app:cardBackgroundColor="@color/white">
 
@@ -80,7 +83,8 @@
                             android:layout_height="wrap_content"
                             android:text="Ladder Progress"
                             android:textAppearance="?attr/textAppearanceTitleMedium"
-                            android:textColor="@color/text_primary" />
+                            android:textColor="@color/text_primary"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/tvProgressStats"
@@ -88,7 +92,8 @@
                             android:layout_height="wrap_content"
                             android:text="0/50 Problems Solved"
                             android:textAppearance="?attr/textAppearanceBodyMedium"
-                            android:textColor="@color/text_secondary" />
+                            android:textColor="@color/text_secondary"
+                            android:layout_marginTop="2dp" />
                     </LinearLayout>
 
                     <com.google.android.material.progressindicator.CircularProgressIndicator
@@ -96,109 +101,112 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:progress="0"
-                        app:indicatorSize="64dp"
-                        app:trackThickness="8dp"
+                        app:indicatorSize="56dp"
+                        app:trackThickness="6dp"
                         app:indicatorColor="@color/primary"
-                        app:trackColor="#B0D8D8" />
+                        app:trackColor="#E1F5EE" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <GridLayout
+            <!-- 2x2 Responsive Grid using ConstraintLayout -->
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:columnCount="2"
-                android:rowCount="2"
-                android:alignmentMode="alignMargins"
-                android:columnOrderPreserved="false">
+                android:layout_height="wrap_content">
 
-                <!-- Total Classes -->
+                <!-- Top Left: Total Classes -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardTotalClasses"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
                     android:layout_margin="4dp"
                     app:cardCornerRadius="12dp"
-                    app:cardElevation="2dp"
+                    app:cardElevation="1dp"
                     app:strokeWidth="1dp"
                     app:strokeColor="#E5E7EB"
-                    app:cardBackgroundColor="@color/white">
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/cardAttendedClasses">
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:padding="12dp">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Classes" android:textAppearance="?attr/textAppearanceLabelLarge" android:textColor="@color/text_secondary"/>
-                        <TextView android:id="@+id/tvTotalClasses" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textAppearance="?attr/textAppearanceHeadlineMedium" android:textColor="@color/text_primary" />
+                        <TextView android:id="@+id/tvTotalClasses" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textAppearance="?attr/textAppearanceHeadlineSmall" android:textColor="@color/text_primary" android:textStyle="bold" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Attended -->
+                <!-- Top Right: Attended -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardAttendedClasses"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
                     android:layout_margin="4dp"
                     app:cardCornerRadius="12dp"
-                    app:cardElevation="2dp"
+                    app:cardElevation="1dp"
                     app:strokeWidth="1dp"
                     app:strokeColor="#E5E7EB"
-                    app:cardBackgroundColor="@color/white">
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/cardTotalClasses">
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:padding="12dp">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Attended" android:textAppearance="?attr/textAppearanceLabelLarge" android:textColor="@color/text_secondary"/>
-                        <TextView android:id="@+id/tvAttendedClasses" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textAppearance="?attr/textAppearanceHeadlineMedium" android:textColor="@color/text_primary" />
+                        <TextView android:id="@+id/tvAttendedClasses" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textAppearance="?attr/textAppearanceHeadlineSmall" android:textColor="@color/text_primary" android:textStyle="bold" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- CF Rating -->
+                <!-- Bottom Left: CF Rating -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardCfRating"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
                     android:layout_margin="4dp"
                     app:cardCornerRadius="12dp"
-                    app:cardElevation="2dp"
-                    app:strokeWidth="2dp"
+                    app:cardElevation="1dp"
+                    app:strokeWidth="1dp"
                     app:strokeColor="@android:color/transparent"
-                    app:cardBackgroundColor="@color/white">
+                    app:layout_constraintTop_toBottomOf="@id/cardTotalClasses"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/cardClubRating">
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:padding="12dp">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CF Rating" android:textAppearance="?attr/textAppearanceLabelLarge" android:textColor="@color/text_secondary"/>
-                        <TextView android:id="@+id/tvCfRating" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textAppearance="?attr/textAppearanceHeadlineMedium" android:textColor="@color/text_primary" />
+                        <TextView android:id="@+id/tvCfRating" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textAppearance="?attr/textAppearanceHeadlineSmall" android:textColor="@color/text_primary" android:textStyle="bold" />
                         <TextView android:id="@+id/tvCfRank" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Unrated" android:textAppearance="?attr/textAppearanceLabelSmall" android:textStyle="bold" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Club Rating -->
+                <!-- Bottom Right: Club Rating -->
                 <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardClubRating"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
                     android:layout_margin="4dp"
                     app:cardCornerRadius="12dp"
-                    app:cardElevation="2dp"
+                    app:cardElevation="1dp"
                     app:strokeWidth="1dp"
                     app:strokeColor="#E5E7EB"
-                    app:cardBackgroundColor="@color/white">
+                    app:layout_constraintTop_toBottomOf="@id/cardAttendedClasses"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/cardCfRating">
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:padding="12dp">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Club Rating" android:textAppearance="?attr/textAppearanceLabelLarge" android:textColor="@color/text_secondary"/>
-                        <TextView android:id="@+id/tvClubRating" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textAppearance="?attr/textAppearanceHeadlineMedium" android:textColor="@color/text_primary" />
+                        <TextView android:id="@+id/tvClubRating" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textAppearance="?attr/textAppearanceHeadlineSmall" android:textColor="@color/text_primary" android:textStyle="bold" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
-            </GridLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -207,13 +215,13 @@
                 android:textColor="@color/primary"
                 android:textStyle="bold"
                 android:textAppearance="?attr/textAppearanceTitleLarge"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="20dp"
                 android:layout_marginBottom="12dp" />
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="8dp"
+                app:cardCornerRadius="12dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="1dp"
                 app:strokeColor="@color/primary"

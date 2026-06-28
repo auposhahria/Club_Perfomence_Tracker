@@ -50,10 +50,7 @@ public class CodeforcesApiClient {
         return new ArrayList<>();
     }
 
-    /**
-     * Fetch standings for the entire contest (paginated).
-     * This is the most reliable way to find all participants without handle quirks.
-     */
+
     public List<CfModels.RankRow> fetchAllStandings(int contestId, boolean unofficial) throws IOException {
         List<CfModels.RankRow> allRows = new ArrayList<>();
         int from = 1;
